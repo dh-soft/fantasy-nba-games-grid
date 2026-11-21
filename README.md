@@ -6,7 +6,7 @@ It is a standard agent skill: a `SKILL.md` that tells the agent what to run, and
 
 ## Install
 
-Also available as a free download on Capafy: https://capafy.ai/agent/free-fantasy-nba-schedule-streaming-days-grid/8228772167
+Also available as a free download on Capafy: https://capafy.ai/agent/free-fantasy-nba-schedule-streaming-days-grid/8228772167?ct=github_freenba
 
 Claude Code (or any agent that reads `SKILL.md` skills):
 
@@ -50,7 +50,7 @@ See [examples/sample-output.md](examples/sample-output.md) (a real run with a sa
 
 ## Want it checked automatically?
 
-[Fantasy NBA Roster Watch](https://capafy.ai/agent/fantasy-nba-roster-watch-start-sit-streamers/4740205927) on Capafy checks your roster every 4 hours with injuries, minutes trends, start/sit and streamers for your weak categories.
+[Fantasy NBA Roster Watch](https://capafy.ai/agent/fantasy-nba-roster-watch-start-sit-streamers/4740205927?ct=github_nbarw) on Capafy checks your roster every 4 hours with injuries, minutes trends, start/sit and streamers for your weak categories.
 
 ## License
 

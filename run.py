@@ -2,6 +2,7 @@
 """Free NBA weekly games grid & back-to-back finder. Python 3.8+, standard library only.
 
   python3 run.py grid [--roster "Victor Wembanyama, Luka Doncic"] [--slots 10] [--tz "Seoul"]
+  python3 run.py grid --teams all  every team's games this week (Mon-Sun): count, game days, back-to-backs
   python3 run.py settings --tz "Los Angeles"   remember a time zone (city or IANA name)
   python3 run.py setkey            read your free BALLDONTLIE key from stdin and save it locally
   python3 run.py status            show where the key is read from and how fresh the cache is
@@ -344,6 +345,36 @@ def back_to_backs(days: list) -> list:
     return [d for d in days if (date.fromisoformat(d) - timedelta(days=1)).isoformat() in s]
 
 
+def week_teams(sched: dict, mon: date) -> dict:
+    """{team: (game dates in the week mon..mon+6, back-to-back second dates in that week)}, every team in the schedule.
+
+    ponytail: a back-to-back that starts on the Sunday before `mon` is not seen (the schedule starts on `mon`)."""
+    week = {(mon + timedelta(days=i)).isoformat() for i in range(7)}
+    tdays = team_days([g for g in sched["games"] if not g["post"]])
+    return {t: ([d for d in ds if d in week], [d for d in back_to_backs(ds) if d in week]) for t, ds in tdays.items()}
+
+
+def b2b_label(second: str) -> str:
+    """'2026-11-25' -> 'Nov 24-25' (both days of the back-to-back)."""
+    d2 = date.fromisoformat(second)
+    d1 = d2 - timedelta(days=1)
+    return "%s %d-%s" % (d1.strftime("%b"), d1.day, d2.day if d1.month == d2.month else d2.strftime("%b ") + str(d2.day))
+
+
+def report_all_teams(sched: dict, today: date) -> str:
+    mon = today - timedelta(days=today.weekday())
+    rows = week_teams(sched, mon)
+    L = ["# NBA games per team — %s to %s (%d teams)" % (day_label(mon), day_label(mon + timedelta(days=6)), len(rows)),
+         "", "League dates are US Eastern. Schedule updated %s." % sched["fetched"], "",
+         "| Team | Games | Game days | Back-to-backs |", "|---|---|---|---|"]
+    for t in sorted(rows, key=lambda t: (-len(rows[t][0]), t)):
+        days, b2b = rows[t]
+        L.append("| %s | %d | %s | %s |" % (t, len(days), " ".join(date.fromisoformat(d).strftime("%a") for d in days) or "-",
+                                          ", ".join(b2b_label(d) for d in b2b) or "-"))
+    L += ["", FOOTER]
+    return "\n".join(L)
+
+
 # ---------- names ----------
 
 def norm_name(name: str) -> str:
@@ -496,6 +527,9 @@ def cmd_grid(a) -> None:
     today = league_today(datetime.now(timezone.utc))
     factory = make_client_factory()
     sched = load_schedule(factory, today)
+    if a.teams:
+        print(report_all_teams(sched, today))
+        return
     roster = unmatched = notes = None
     if a.roster:
         names = [n for n in a.roster.replace("\n", ",").split(",") if n.strip()][:30]
@@ -540,6 +574,7 @@ def main(argv=None) -> int:
     p.add_argument("--roster", help='comma-separated names, e.g. "Victor Wembanyama, Luka Doncic"')
     p.add_argument("--slots", type=int, default=DEFAULT_SLOTS, help="daily starting slots (default 10)")
     p.add_argument("--tz", help="city or IANA time zone for tip-off times (default: saved setting or US Eastern)")
+    p.add_argument("--teams", choices=["all"], help="all: every team's games this week (Mon-Sun) instead of the grid")
     p = sub.add_parser("settings")
     p.add_argument("--tz")
     sub.add_parser("setkey")

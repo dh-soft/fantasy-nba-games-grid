@@ -21,6 +21,7 @@ The key is saved only on the user's computer (`~/.config/dhsoft-fantasy-grids/co
 | The user wants | Command |
 |---|---|
 | Games per team this week and next, back-to-backs, light days | `python3 <skill>/run.py grid` |
+| All 30 teams this week (Mon-Sun): games, game days, back-to-backs | `python3 <skill>/run.py grid --teams all` |
 | Their roster's games and open slots | `python3 <skill>/run.py grid --roster "Victor Wembanyama, Luka Doncic, Nikola Jokic" --slots 10` |
 | Tip-off times in their time zone | add `--tz "Seoul"` (a big city or an IANA name), or save it once: `python3 <skill>/run.py settings --tz "Seoul"` |
 | To check the key and cache | `python3 <skill>/run.py status` |
